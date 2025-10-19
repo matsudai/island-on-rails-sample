@@ -68,6 +68,28 @@ npm i
 
 ## ４．Railsからの参照設定
 
+* Procfile.dev (開発用)
+
+    * **注：React側での変更後、importするRails側のJSを更新してPropshaftをトリガする必要があります。**
+
+    ```diff
+    + shared-ui: cd shared-ui && npm run build -- --watch
+    ```
+
+* lib/tasks/custom_assets.rake (本番用)
+
+    ```rb
+    namespace :custom_assets do
+      desc "Build shared-ui package"
+      task :build_shared_ui do
+        system("cd shared-ui && npm run build")
+      end
+    end
+
+    # 一般的なassets:precompileタスクの前にshared-uiをビルドします。
+    Rake::Task["assets:precompile"].enhance ["custom_assets:build_shared_ui"]
+    ```
+
 * config/application.rb
 
     ```diff
@@ -269,6 +291,17 @@ rails generate controller pages about
     ```
 
 ### ６．１ 動作確認
+
+* 新規でcloneした環境の場合
+
+    ```sh
+    # Rails
+    bundle install
+
+    # React
+    cd shared-ui
+    npm install
+    ```
 
 * React側での動作確認
 
