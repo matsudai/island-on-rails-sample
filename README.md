@@ -151,3 +151,134 @@ npm install tailwindcss@~4.1.13 @tailwindcss/vite
 ```sh
 ./bin/importmap pin react-dom@~19.2.0/client react@~19.2.0
 ```
+
+## Reactコンポーネントの作成とRailsでの利用
+
+今回は例として下記条件で確かめます。
+
+* React : `.my-component-class` および `.text-[#ff00ff]` のスタイルがRails側で反映されることを確認します。
+* Rails : viewsで使われる `.my-component-class` にReact側で定義されたスタイルが当たること、Railsでのみ利用される `.text-[#00ffff]` にスタイルが反映されることを確認します。
+
+```sh
+rails generate controller pages about
+```
+
+* app/views/pages/about.html.erb
+
+    ```diff
+    - <div>
+    + <div data-controller="my-component">
+        <h1 class="font-bold text-4xl">Pages#about</h1>
+    -   <p>Find me in app/views/pages/about.html.erb</p>
+    +   <p>
+    +     <span class="my-component-class">React (</span>
+    +     <input type="number" data-my-component-target="input" name="dummy" value="10" class="w-8" />
+    +     <span class="text-[#00ffff]">) Rails</span>
+    +   </p>
+    +   <div data-my-component-target="button" class="contents">Loading...</div>
+      </div>
+    ```
+
+* app/javascript/controllers/my_component_controller.js
+
+    ```js
+    import { Controller } from "@hotwired/stimulus"
+    import { createElement } from "react";
+    import { createRoot } from "react-dom/client";
+    import { Button } from "shared-ui";
+
+    export default class extends Controller {
+      static targets = ["input", "button"];
+
+      connect() {
+        this.root = createRoot(this.buttonTarget);
+        this.inputTarget.addEventListener("input", this.render);
+        this.render();
+      }
+
+      disconnect() {
+        this.inputTarget.removeEventListener("input", this.render);
+        this.root.unmount();
+      }
+
+      render = () => { // ※ function形式の場合は他の関数に渡すときに `this.render.bind(this)` で渡す必要があります。
+        const count = Number.parseInt(this.inputTarget.value);
+        this.root.render(createElement(Button, { count, onChangeCount: this.handleChangeCount }));
+      };
+
+      handleChangeCount = (count) => {
+        this.inputTarget.value = count;
+        this.render();
+      };
+    }
+    ```
+
+* shared-ui/src/Button.tsx
+
+    ```tsx
+    import { type FC } from "react";
+
+    interface ButtonProps {
+      count: number;
+      onChangeCount: (count: number) => void;
+    }
+
+    export const Button: FC<ButtonProps> = (props) => {
+      const { count, onChangeCount } = props;
+
+      return (
+        <button onClick={() => onChangeCount(count + 1)}>
+          <span className="my-component-class">Vite (</span>
+          {count}
+          <span className="text-[#ff00ff]">) React</span>
+        </button>
+      );
+    };
+    ```
+
+* shared-ui/src/index.css
+
+    ```diff
+      @import "tailwindcss";
+    +
+    + @layer components {
+    +   .my-component-class {
+    +     @apply text-blue-500;
+    +   }
+    + }
+    ```
+
+* shared-ui/src/index.ts
+
+    ```ts
+    export { Button } from './Button';
+    ```
+
+* shared-ui/src/App.tsx
+
+    ```diff
+    + import { Button } from './Button';
+
+      ...
+
+      <div className="card">
+    +   <Button count={count} onChangeCount={setCount} />
+        <button onClick={() => setCount((count) => count + 1)}>
+          count is {count}
+        </button>
+    ```
+
+### 動作確認
+
+* React側での動作確認
+
+    ```sh
+    cd shared-ui
+    npm run dev # => http://localhost:5173/
+    ```
+
+* Rails側での動作確認
+
+    ```sh
+    ./bin/dev # => http://localhost:3000/
+    ```
