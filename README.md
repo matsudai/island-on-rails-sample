@@ -1,8 +1,8 @@
-# React x Rails
+# React x Rails (+tailwindcss)
 
 環境構築手順を示します。
 
-## 事前準備
+## １．事前準備
 
 事前にRuby、Node.jsを準備してください。
 
@@ -14,7 +14,7 @@ gem install rails -v '8.1.0.rc1'
 rails -v # => Rails 8.1.0.rc1
 ```
 
-## フレームワークの導入
+## ２．フレームワークの導入
 
 RailsとViteを導入します。
 
@@ -30,7 +30,7 @@ cd shared-ui
 npm i
 ```
 
-## ViteのLibrary Mode設定
+## ３．ViteのLibrary Mode設定
 
 * shared-ui/vite.config.js
 
@@ -66,7 +66,7 @@ npm i
     */
     ```
 
-## Railsからの参照設定
+## ４．Railsからの参照設定
 
 * config/application.rb
 
@@ -88,9 +88,9 @@ npm i
     + pin "shared-ui"
     ```
 
-## React/Railsの共通ライブラリの導入
+## ５．React/Railsの共通ライブラリの導入
 
-### 片方にしかないライブラリのバージョン確認
+### ５．１ 片方にしかないライブラリのバージョン確認
 
 * React側に合わせるもの
 
@@ -110,7 +110,7 @@ npm i
     bundle list | grep tailwindcss-ruby # => 4.1.13
     ```
 
-### Reactへの共通ライブラリ導入
+### ５．２ Reactへの共通ライブラリ導入
 
 前の手順で確認したバージョンを指定します。
 
@@ -141,7 +141,7 @@ npm install tailwindcss@~4.1.13 @tailwindcss/vite
     + @import "tailwindcss";
     ```
 
-### Railsへの共通ライブラリ導入
+### ５．３ Railsへの共通ライブラリ導入
 
 前の手順で確認したバージョンを指定します。
 
@@ -152,7 +152,7 @@ npm install tailwindcss@~4.1.13 @tailwindcss/vite
 ./bin/importmap pin react-dom@~19.2.0/client react@~19.2.0
 ```
 
-## Reactコンポーネントの作成とRailsでの利用
+## ６．Reactコンポーネントの作成とRailsでの利用
 
 今回は例として下記条件で確かめます。
 
@@ -268,7 +268,7 @@ rails generate controller pages about
         </button>
     ```
 
-### 動作確認
+### ６．１ 動作確認
 
 * React側での動作確認
 
