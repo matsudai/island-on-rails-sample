@@ -87,3 +87,67 @@ npm i
     ```diff
     + pin "shared-ui"
     ```
+
+## React/Railsの共通ライブラリの導入
+
+### 片方にしかないライブラリのバージョン確認
+
+* React側に合わせるもの
+
+    ```sh
+    cd shared-ui
+
+    # React, React DOM
+    npm list
+        # react-dom@19.2.0
+        # react@19.2.0
+    ```
+
+* Rails側に合わせるもの
+
+    ```sh
+    # tailwindcss
+    bundle list | grep tailwindcss-ruby # => 4.1.13
+    ```
+
+### Reactへの共通ライブラリ導入
+
+前の手順で確認したバージョンを指定します。
+
+* tailwindcss : 4.1系
+
+```sh
+# refs https://tailwindcss.com/docs/installation/using-vite
+cd shared-ui
+npm install tailwindcss@~4.1.13 @tailwindcss/vite
+```
+
+* shared-ui/vite.config.js
+
+    ```diff
+      import { defineConfig } from 'vite'
+      import react from '@vitejs/plugin-react'
+    + import tailwindcss from '@tailwindcss/vite'
+
+      // https://vite.dev/config/
+      export default defineConfig({
+    -   plugins: [react()],
+    +   plugins: [react(), tailwindcss()],
+    ```
+
+* shared-ui/src/index.css
+
+    ```diff
+    + @import "tailwindcss";
+    ```
+
+### Railsへの共通ライブラリ導入
+
+前の手順で確認したバージョンを指定します。
+
+* react-dom : 19.2系
+* react : 19.2系
+
+```sh
+./bin/importmap pin react-dom@~19.2.0/client react@~19.2.0
+```
