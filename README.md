@@ -1,24 +1,31 @@
-# README
+# React x Rails
 
-This README would normally document whatever steps are necessary to get the
-application up and running.
+環境構築手順を示します。
 
-Things you may want to cover:
+## 事前準備
 
-* Ruby version
+事前にRuby、Node.jsを準備してください。
 
-* System dependencies
+```sh
+ruby -v # => ruby 3.4.7
+node -v # => v24.10.0
 
-* Configuration
+gem install rails -v '8.1.0.rc1'
+rails -v # => Rails 8.1.0.rc1
+```
 
-* Database creation
+## フレームワークの導入
 
-* Database initialization
+RailsとViteを導入します。
 
-* How to run the test suite
+```sh
+rails new react-rails-sample --css tailwind --skip-test
+cd react-rails-sample
 
-* Services (job queues, cache servers, search engines, etc.)
-
-* Deployment instructions
-
-* ...
+npm create vite@latest
+    # Project name: shared-ui
+    # Select a framework: React
+    # Select a variant: TypeScript
+cd shared-ui
+npm i
+```
