@@ -38,5 +38,8 @@ module ReactRailsSample
 
     # Don't generate system test files.
     config.generators.system_tests = nil
+
+    # React (Vite) components
+    config.assets.paths << Rails.root.join("shared-ui/dist")
   end
 end
