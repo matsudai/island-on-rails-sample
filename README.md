@@ -73,7 +73,8 @@ npm i
     * **注：React側での変更後、importするRails側のJSを更新してPropshaftをトリガする必要があります。**
 
     ```diff
-    + shared-ui: cd shared-ui && npm run build -- --watch
+    + shared-ui: cd shared-ui && npm run dev # http://localhost:5173/
+    + shared-ui-css: cd shared-ui && npm run build -- --watch
     ```
 
 * lib/tasks/custom_assets.rake (本番用)
@@ -303,15 +304,80 @@ rails generate controller pages about
     npm install
     ```
 
-* React側での動作確認
+* サーバの起動
 
     ```sh
-    cd shared-ui
-    npm run dev # => http://localhost:5173/
+    ./bin/dev
+        # React => hhttp://localhost:5173/
+        # Rails => hhttp://localhost:3000/
     ```
 
-* Rails側での動作確認
+### ７．その他
 
-    ```sh
-    ./bin/dev # => http://localhost:3000/
+#### ７．１ TurboStreamとの連携
+
+RailsではActionJobなどのサーバ側の処理にトリガして画面更新が可能です。
+ただし、このイベントはJavaScriptで拾うことが難しいためカスタムイベントを定義します。
+
+例えば「投票画面での投票（登録）にトリガして、結果画面の一覧の円グラフを更新（Doughnutコンポーネントの再描画）する」場合は次のようにします。
+
+* app/javascript/application.js ※ 汎用的に使えるためアプリケーションに1つだけでOK。
+
+    ```diff
+    + Turbo.StreamActions.dispatch_event = function () {
+    +   const name = this.getAttribute("event-name");
+    +   const detail = JSON.parse(this.getAttribute("event-detail") || "{}");
+    + 
+    +   const event = new CustomEvent(name, { detail, bubbles: true });
+    +   this.targetElements.forEach((target) => target.dispatchEvent(event));
+    + };
+    ```
+
+* (例) app/models/vote_job.rb
+
+    ```diff
+      # 投票結果の更新
+      def broadcast_summary
+        # 画面上の
+        Turbo::StreamsChannel.broadcast_replace_to(
+          "summary",
+          target: "summary-chart-#{id}",
+          partial: "summary/chart_data",
+          locals: { candidates: }
+        )
+
+    +   Turbo::StreamsChannel.broadcast_action_to(
+    +     "summary",
+    +     action: "dispatch_event",
+    +     target: "summary-chart-#{id}",
+    +     attributes: { 
+    +       "event-name": "summary:change",
+    +       "event-detail": { id: }.to_json
+    +     }
+    +   )
+      end
+    ```
+
+* (例) app/javascript/controllers/vote_controller.js
+
+    ```diff
+      export default class extends Controller {
+        static targets = ["chart", "data"];
+
+        connect() {
+          this.chart = createRoot(this.chartTarget);
+          this.render();
+    +     this.element.addEventListener("summary:change", this.render);
+        }
+
+        disconnect() {
+    +     this.element.removeEventListener("summary:change", this.render);
+          this.chart.unmount();
+        }
+
+        render = () => {
+          const data = JSON.parse(this.dataTarget.textContent);
+          this.chart.render(createElement(Doughnut, { data }));
+        };
+      }
     ```
