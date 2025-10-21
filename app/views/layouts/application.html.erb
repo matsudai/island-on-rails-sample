@@ -24,6 +24,14 @@
   </head>
 
   <body>
+    <header class="bg-white shadow-sm border-b border-gray-200 fixed top-0 left-0 right-0 z-50">
+      <nav class="container mx-auto px-5 py-4">
+        <div class="flex items-center gap-6">
+          <%= link_to "投票", votes_path, class: "text-lg font-medium text-gray-700 hover:text-blue-600 #{'text-blue-600' if current_page?(votes_path)}" %>
+          <%= link_to "投票結果", summaries_path, class: "text-lg font-medium text-gray-700 hover:text-blue-600 #{'text-blue-600' if current_page?(summaries_path)}" %>
+        </div>
+      </nav>
+    </header>
     <main class="container mx-auto mt-28 px-5 flex">
       <%= yield %>
     </main>

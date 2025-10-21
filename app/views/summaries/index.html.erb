@@ -1,0 +1,19 @@
+<% content_for :title, "Summaries" %>
+
+<%= turbo_stream_from "summaries" %>
+
+<div class="w-full">
+  <div class="flex justify-between items-center">
+    <h1 class="font-bold text-4xl">Summaries</h1>
+  </div>
+
+  <div class="flex">
+    <div class="flex-1">
+      <%= render "summaries_table", candidates: @candidates %>
+    </div>
+    <div class="flex-none" data-controller="vote">
+      <%= render "chart_data", candidates: @candidates %>
+      <div data-vote-target="chart" class="w-96"></div>
+    </div>
+  </div>
+</div>

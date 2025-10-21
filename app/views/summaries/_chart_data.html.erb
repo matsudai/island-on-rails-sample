@@ -1,0 +1,5 @@
+<%= turbo_frame_tag "summaries-chart-data" do %>
+  <script type="application/json" data-vote-target="data">
+    <%= raw format_candidates_to_json(candidates).to_json %>
+  </script>
+<% end %>
