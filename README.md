@@ -10,8 +10,8 @@
 ruby -v # => ruby 3.4.7
 node -v # => v24.10.0
 
-gem install rails -v '8.1.0.rc1'
-rails -v # => Rails 8.1.0.rc1
+gem install rails
+rails -v # => Rails 8.1.0
 ```
 
 ## ２．フレームワークの導入
@@ -19,8 +19,8 @@ rails -v # => Rails 8.1.0.rc1
 RailsとViteを導入します。
 
 ```sh
-rails new react-rails-sample --css tailwind --skip-test
-cd react-rails-sample
+rails new islands-on-rails --css tailwind --skip-test
+cd islands-on-rails
 
 npm create vite@latest
     # Project name: shared-ui
@@ -70,14 +70,19 @@ npm i
 
 * Procfile.dev (開発用)
 
-    * **注：React側での変更後、importするRails側のJSを更新してPropshaftをトリガする必要があります。**
+    **注：開発中にはReactコンポーネントを変更した場合、Rails側に反映するにはRails側のJavaScriptを保存したうえで画面をリロードする必要があります。**
 
     ```diff
-    + shared-ui: cd shared-ui && npm run dev # http://localhost:5173/
+    - web: bin/rails server
+    + web: bin/rails server -b 0.0.0.0
+      css: bin/rails tailwindcss:watch
+    + shared-ui: cd shared-ui && npm run dev
     + shared-ui-css: cd shared-ui && npm run build -- --watch
     ```
 
 * lib/tasks/custom_assets.rake (本番用)
+
+    Railsの本番モードでは `rails assets:precompile` するため、その処理前にESMをビルドするようにします。
 
     ```rb
     namespace :custom_assets do
@@ -91,18 +96,29 @@ npm i
     Rake::Task["assets:precompile"].enhance ["custom_assets:build_shared_ui"]
     ```
 
-* config/application.rb
-
-    ```diff
-    + # React (Vite) components
-    + config.assets.paths << Rails.root.join("shared-ui/dist")
-    ```
-
 * app/assets/tailwind/application.css
+
+    Rails側のTailwindCSSエントリポイントで、ViteのCSSを指定します。
 
     ```diff
       @import "tailwindcss";
     + @import "../../../shared-ui/src/index.css";
+    ```
+
+* config/application.rb
+
+    importmapの参照先に、Viteアプリのビルド結果の出力先ディレクトリを追加します。
+
+    ```diff
+     module IslandsOnRails
+       class Application < Rails::Application
+
+         ...
+
+    +     # React (Vite) components
+    +     config.assets.paths << Rails.root.join("shared-ui/dist")
+        end
+      end
     ```
 
 * config/importmap.rb
@@ -308,8 +324,8 @@ rails generate controller pages about
 
     ```sh
     ./bin/dev
-        # React => hhttp://localhost:5173/
-        # Rails => hhttp://localhost:3000/
+        # React => http://localhost:5173/
+        # Rails => http://localhost:3000/
     ```
 
 ### ７．その他

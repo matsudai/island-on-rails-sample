@@ -1,4 +1,4 @@
-web: bin/rails server
+web: bin/rails server -b 0.0.0.0
 css: bin/rails tailwindcss:watch
 shared-ui: cd shared-ui && npm run dev
 shared-ui-css: cd shared-ui && npm run build -- --watch
