@@ -1,12 +1,12 @@
-<% content_for :title, "Votes" %>
+<% content_for :title, "投票" %>
 
 <div class="w-full">
   <div class="flex justify-between items-center">
-    <h1 class="font-bold text-4xl">Votes</h1>
+    <h1 class="font-bold text-4xl">投票</h1>
   </div>
 
   <div class="mt-8 w-max mx-auto">
-    <h2 class="font-bold text-2xl mb-4">Cast Your Vote</h2>
+    <h2 class="font-bold text-2xl mb-4">投票する</h2>
     <% if @vote.errors.any? %>
       <div id="error_explanation" class="bg-red-50 text-red-500 px-3 py-2 font-medium rounded-md mt-3 mb-5">
         <h2><%= pluralize(@vote.errors.count, "error") %> prohibited this vote from being saved:</h2>
@@ -30,7 +30,7 @@
   </div>
 
   <div id="votes" class="mt-8 overflow-x-auto">
-    <h2 class="font-bold text-2xl mb-4">All Votes</h2>
+    <h2 class="font-bold text-2xl mb-4">すべての投票</h2>
     <% if @votes.any? %>
       <table class="min-w-full divide-y divide-gray-200">
         <thead class="bg-gray-50">

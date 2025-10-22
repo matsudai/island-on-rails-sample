@@ -6,7 +6,7 @@ class VotesController < ApplicationController
   def index
     @votes = Vote.eager_load(:candidate).order(created_at: :desc, id: :desc)
     @vote = Vote.new
-    @candidates = Candidate.all
+    @candidates = Candidate.order(:id)
   end
 
   # POST /votes

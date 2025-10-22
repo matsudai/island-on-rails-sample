@@ -11,8 +11,8 @@
         <tbody class="bg-white divide-y divide-gray-200">
           <% candidates.each do |candidate| %>
             <tr id="<%= dom_id candidate %>">
-              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900"><%= candidate.name %></td>
-              <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900"><%= candidate.votes_count %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm font-medium" style="color: <%= candidate.solid_color %>;"><%= candidate.name %></td>
+              <td class="px-6 py-4 whitespace-nowrap text-sm" style="color: <%= candidate.solid_color %>;"><%= candidate.votes_count %></td>
             </tr>
           <% end %>
         </tbody>
@@ -22,4 +22,3 @@
     <% end %>
   </div>
 <% end %>
-
