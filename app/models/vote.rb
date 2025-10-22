@@ -22,7 +22,7 @@ class Vote < ApplicationRecord
       "summaries",
       action: "dispatch_event",
       target: "summaries-chart-data",
-      attributes: { 
+      attributes: {
         "event-name": "summaries:change",
         "event-detail": {}.to_json
       }

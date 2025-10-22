@@ -4,7 +4,7 @@ module SummariesHelper
       labels: candidates.map(&:name),
       datasets: [
         {
-          label: '# of Votes',
+          label: "# of Votes",
           data: candidates.map(&:votes_count),
           backgroundColor: candidates.map(&:faded_color),
           borderColor: candidates.map(&:solid_color),

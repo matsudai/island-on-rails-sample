@@ -1,3 +1,18 @@
+# Quick Start
+
+```sh
+# Clone
+git clone https://github.com/matsudai/islands-on-rails-sample.git
+cd islands-on-rails-sample
+
+# Install
+bundle install
+cd shared-ui && npm install && cd ..
+
+# Run
+./bin/dev # => http://localhost:3000/
+```
+
 # React x Rails (+tailwindcss)
 
 環境構築手順を示します。

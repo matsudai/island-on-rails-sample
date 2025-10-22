@@ -6,4 +6,4 @@ namespace :custom_assets do
 end
 
 # 一般的なassets:precompileタスクの前にshared-uiをビルドします。
-Rake::Task["assets:precompile"].enhance ["custom_assets:build_shared_ui"]
+Rake::Task["assets:precompile"].enhance [ "custom_assets:build_shared_ui" ]
