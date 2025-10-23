@@ -412,3 +412,114 @@ RailsではActionJobなどのサーバ側の処理にトリガして画面更新
         };
       }
     ```
+
+#### ７．２ 本番モード、開発時のSolid*利用メモ
+
+Rails 8ではSolid Cache、Solid Queue、Solid Cableが標準で導入されます。
+これらはSQLiteベースの永続化されたキャッシュ、ジョブキュー、WebSocket接続を提供します。
+
+* config/database.yml
+
+    マルチデータベース構成でcache、queue、cableの設定を追加します。
+
+    ```diff
+      development:
+    -   <<: *default
+    -   database: storage/development.sqlite3
+    +   primary:
+    +     <<: *default
+    +     database: storage/development.sqlite3
+    +   cache:
+    +     <<: *default
+    +     database: storage/development_cache.sqlite3
+    +     migrations_paths: db/cache_migrate
+    +   queue:
+    +     <<: *default
+    +     database: storage/development_queue.sqlite3
+    +     migrations_paths: db/queue_migrate
+    +   cable:
+    +     <<: *default
+    +     database: storage/development_cable.sqlite3
+    +     migrations_paths: db/cable_migrate
+    ```
+
+* config/environments/development.rb
+
+    開発環境でSolid CacheとSolid Queueを有効にします。
+
+    ```diff
+    - # Change to :null_store to avoid any caching.
+    - config.cache_store = :memory_store
+    + # # Change to :null_store to avoid any caching.
+    + # config.cache_store = :memory_store
+    + # Replace the default in-process memory cache store with a durable alternative.
+    + config.cache_store = :solid_cache_store
+    + 
+    + # Replace the default in-process and non-durable queuing backend for Active Job.
+    + config.active_job.queue_adapter = :solid_queue
+    + config.solid_queue.connects_to = { database: { writing: :queue } }
+    ```
+
+* config/cable.yml
+
+    Solid CableをデフォルトのAction Cableアダプターとして設定します。
+
+    ```diff
+    - development:
+    -   adapter: async
+    -
+    - test:
+    -   adapter: test
+    -
+    - production:
+    + default:
+        adapter: solid_cable
+        connects_to:
+          database:
+            writing: cable
+        polling_interval: 0.1.seconds
+        message_retention: 1.day
+    + 
+    + development:
+    +   <<: *default
+    + 
+    + test:
+    +   adapter: test
+    + 
+    + production:
+    +   <<: *default
+    ```
+
+* config/environments/production.rb
+
+    本番環境でSSLを無効にし、localhostでのアクセスを許可します（ローカル用設定）。
+
+    実際のプロダクトでは、環境変数などで設定してください。
+
+    ```diff
+    - config.assume_ssl = true
+    + config.assume_ssl = false
+    - config.force_ssl = true
+    + config.force_ssl = false
+    + config.hosts = [ "localhost" ]
+    + config.action_cable.allowed_request_origins = [ "http://localhost:3000" ]
+    ```
+
+本番モードは下記の手順で起動します。
+今回はcredentials.ymlに何も入れていないので削除しています。
+
+```sh
+rm config/master.key config/credentials.yml.enc
+export RAILS_ENV=production
+rails credentials:edit
+
+# 1. Build
+RAILS_MASTER_KEY_DUMMY=1 rails assets:precompile db:prepare
+
+# 2. Run
+rails s -b 0.0.0.0
+
+# X. Clean
+# => 終了後、開発環境に影響があるためアセットのキャッシュを削除します。
+rails assets:clobber
+```
